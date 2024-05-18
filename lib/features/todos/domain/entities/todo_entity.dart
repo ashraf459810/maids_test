@@ -20,7 +20,7 @@ class Todo {
         todo: json["todo"],
         completed: json["completed"],
         userId: json["userId"],
-        isLocal: false,
+        isLocal: json['isLocal']??false,
       );
 
   Map<String, dynamic> toJson() => {
@@ -28,5 +28,11 @@ class Todo {
         "todo": todo,
         "completed": completed,
         "userId": userId,
+        "isLocal" :isLocal
       };
+}
+
+List<Todo> todosFromJson(String str) {
+  final Iterable<dynamic> parsed = json.decode(str);
+  return List<Todo>.from(parsed.map((json) => Todo.fromJson(json)));
 }

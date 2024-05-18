@@ -13,9 +13,9 @@ class LoadingTodosState extends TodosState{}
 
 
 class FetchedTodosState extends TodosState{
-  final TodoModel todoModel;
+  final List<Todo> todos;
 
-  const FetchedTodosState({required this.todoModel});
+  const FetchedTodosState({required this.todos});
 
 }
 

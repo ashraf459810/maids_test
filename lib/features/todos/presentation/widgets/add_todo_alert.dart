@@ -6,7 +6,7 @@ class AddTodoDialog extends StatefulWidget {
   const AddTodoDialog({required this.onAdd, super.key});
 
   @override
-  State< AddTodoDialog> createState() => _AddTodoDialogState();
+  State<AddTodoDialog> createState() => _AddTodoDialogState();
 }
 
 class _AddTodoDialogState extends State<AddTodoDialog> {

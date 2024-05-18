@@ -15,6 +15,7 @@ part 'todos_event.dart';
 part 'todos_state.dart';
 
 class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
+  List<Todo> todos = [];
   final TodosUseCase todosUseCase;
   TodosBloc(this.todosUseCase) : super(TodosInitial()) {
     on<TodosEvent>((event, emit) async {
@@ -26,68 +27,71 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
           final String? cachedData =
               sl<SharedPreferences>().getString(User.todos);
           if (cachedData != null && cachedData.isNotEmpty) {
-            final TodosState cachedState =
-                FetchedTodosState(todoModel: todoModelFromJson(cachedData));
-            emit(cachedState);
+            todos = todosFromJson(cachedData);
+            emit(FetchedTodosState(todos: todosFromJson(cachedData)));
           } else {
             emit(ErrorFetchingTodos(error: failure.error!));
           }
-        }, (r) => emit(FetchedTodosState(todoModel: r)));
+        }, (r) {
+          if (todos.isEmpty) {
+            todos = r.todos;
+          } else {
+            todos.addAll(r.todos);
+          }
+          emit(FetchedTodosState(todos: todos));
+        });
       }
       if (event is AddTodoEvent) {
         emit(LoadingTodosState());
         if (event.isLocal) {
-          // this condition to check if is added to todo created by user locally because the apis dosen't support new todo crud
-          emit(AddTodoSuccessState(
-              todo: Todo(
+          todos.insert(
+              0,
+              Todo(
                   id: generateRandomId(),
                   todo: event.text,
                   completed: event.completed,
                   userId: sl<SharedPreferences>().getString(User.id),
-                  isLocal: true)));
-
+                  isLocal: true));
+          // this condition to check if is added to todo created by user locally because the apis dosen't support new todo crud
+          emit(FetchedTodosState(todos: todos));
         } else {
           var response =
               await todosUseCase.addTodo(event.text, event.completed);
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)), (r) {
             r.isLocal = true;
-            emit(AddTodoSuccessState(todo: r));
+            emit(FetchedTodosState(todos: todos));
           });
         }
       }
       if (event is UpdateTodoEvent) {
+        print(event.todo.id);
+        print(todos[1]);
         emit(LoadingTodosState());
         if (event.todo.isLocal) {
-          emit(UpdateTodoSuccessState(
-              todo: Todo(
-                  id: event.todo.id,
-                  todo: event.todo.todo,
-                  completed: event.todo.completed,
-                  userId: event.todo.userId,
-                  isLocal: true)));
+          int index =
+              todos.indexWhere((element) => element.id == event.todo.id);
+
+          final updatedTodo = event.todo;
+          todos[index] = updatedTodo;
+          emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.updateTodo(
               event.todo.id, event.todo.completed);
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
-              (r) => emit(UpdateTodoSuccessState(todo: r)));
+              (r) => emit(FetchedTodosState(todos: todos)));
         }
       }
       if (event is DeleteTodoEvent) {
         emit(LoadingTodosState());
         if (event.todo.isLocal) {
-          emit(DeleteTodoSuccessState(
-              todo: Todo(
-                  id: event.todo.id,
-                  todo: event.todo.todo,
-                  completed: event.todo.completed,
-                  userId: event.todo.userId,
-                  isLocal: true)));
+          todos.removeWhere((element) => element.id == event.todo.id);
+          emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.deleteTodo(
             event.todo.id,
           );
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
-              (r) => emit(DeleteTodoSuccessState(todo: r)));
+              (r) => emit(FetchedTodosState(todos: todos)));
         }
       }
     });
@@ -97,9 +101,9 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
   TodosState? fromJson(Map<String, dynamic> json) {
     String? jsonTodos = sl<SharedPreferences>().getString(User.todos);
     if (jsonTodos != null) {
-      final todos = todoModelFromJson(jsonTodos);
+      final todos = todosFromJson(jsonTodos);
 
-      return FetchedTodosState(todoModel: todos);
+      return FetchedTodosState(todos: todos);
     } else {
       return null;
     }
@@ -108,10 +112,9 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
   @override
   Map<String, dynamic>? toJson(TodosState state) {
     if (state is FetchedTodosState) {
-      sl<SharedPreferences>()
-          .setString(User.todos, jsonEncode(state.todoModel));
+      sl<SharedPreferences>().setString(User.todos, jsonEncode(state.todos));
     }
-    if (state is AddTodoSuccessState){}
+
     return null;
   }
 }

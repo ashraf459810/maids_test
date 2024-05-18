@@ -26,7 +26,6 @@ class _TodoListPageState extends State<TodoListPage> {
   void initState() {
     todosBloc.add(FetchUserTodosEvent(page: page));
     super.initState();
-  
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
@@ -47,7 +46,8 @@ class _TodoListPageState extends State<TodoListPage> {
       builder: (context) {
         return AddTodoDialog(
           onAdd: (String text, bool isCompleted) {
-            todosBloc.add(AddTodoEvent(text: text, completed: isCompleted,isLocal: true));
+            todosBloc.add(AddTodoEvent(
+                text: text, completed: isCompleted, isLocal: true));
           },
         );
       },
@@ -89,26 +89,7 @@ class _TodoListPageState extends State<TodoListPage> {
                   return const LoadingWidget();
                 }
                 if (state is FetchedTodosState) {
-                  if (todos.isEmpty) {
-                    todos = state.todoModel.todos;
-                  } else {
-                    todos.addAll(state.todoModel.todos);
-                  }
-                }
-                if (state is DeleteTodoSuccessState) {
-                  todos.removeWhere((element) => element.id == state.todo.id);
-                }
-                if (state is UpdateTodoSuccessState) {
-                  int index = todos
-                      .indexWhere((element) => element.id == state.todo.id);
-                  final updatedTodo = state.todo;
-                  todos[index] = updatedTodo;
-                }
-                if (state is AddTodoSuccessState) {
-             
-                  todos.insert(0, state.todo);
-        
-                        
+                  todos = state.todos;
                 }
 
                 return ListView.builder(
@@ -127,11 +108,14 @@ class _TodoListPageState extends State<TodoListPage> {
                     return TodoListItem(
                       todo: todos[index],
                       onTodoUpdated: (updatedTodo) {
-                       
-                       todosBloc.add(UpdateTodoEvent(todo: updatedTodo,));
+                        todosBloc.add(UpdateTodoEvent(
+                          todo: updatedTodo,
+                        ));
                       },
                       onTodoDeleted: (todo) {
-                       todosBloc.add(DeleteTodoEvent( todo: todo , ));
+                        todosBloc.add(DeleteTodoEvent(
+                          todo: todo,
+                        ));
                       },
                     );
                   },
