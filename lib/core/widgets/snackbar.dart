@@ -6,13 +6,13 @@ class CustomSnackBar {
       SnackBar(
         content: Text(
           message,
-          style: TextStyle(
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 16.0,
           ),
         ),
         backgroundColor: Colors.white,
-        duration: Duration(seconds: 3),
+        duration: const Duration(seconds: 3),
         behavior: SnackBarBehavior.floating,
       ),
     );

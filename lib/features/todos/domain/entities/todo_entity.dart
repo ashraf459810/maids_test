@@ -3,17 +3,17 @@ import 'dart:convert';
 Todo todoFromJson(String str) => Todo.fromJson(json.decode(str));
 
 class Todo {
-  int id;
+  int? id;
   String todo;
   bool completed;
   dynamic userId;
-  bool isLocal;   // this parameter is added to check if the todo created by user locally because the api dosn't support add new todo
+  bool? isLocal;   // this parameter is added to check if the todo created by user locally because the api dosn't support add new todo
   Todo(
-      {required this.id,
+      { this.id,
       required this.todo,
       required this.completed,
-      required this.userId,
-      required this.isLocal});
+       this.userId,
+       this.isLocal});
 
   factory Todo.fromJson(Map<String, dynamic> json) => Todo(
         id: json["id"],

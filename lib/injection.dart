@@ -1,6 +1,6 @@
-
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart';
+import 'package:maids_test/core/network/connection_checker.dart';
 import 'package:maids_test/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:maids_test/features/auth/data/datasources/user_remote_data.dart';
 import 'package:maids_test/features/auth/data/repositories/user_repository_imp.dart';
@@ -17,37 +17,38 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'core/network/http_helper.dart';
 import 'core/navigatuin_service/navigation.dart';
 import 'core/network/http_helper_imp.dart';
-import 'core/repository/repository.dart';
-import 'core/repository/repository_imp.dart';
-import 'core/use_case/use_case.dart';
+
 
 final sl = GetIt.instance;
 
 Future iniGetIt() async {
 //bloc
-sl.registerFactory<AuthBloc>(() => AuthBloc( sl(), ));
-sl.registerFactory<TodosBloc>(() => TodosBloc( sl(), ));
+  sl.registerFactory<AuthBloc>(() => AuthBloc(
+        sl(),
+      ));
+  sl.registerFactory<TodosBloc>(() => TodosBloc(
+        sl(),sl()
+      ));
 
 //remote data
- sl.registerFactory<UserRemoteDataSource>(() => UserRemoteDataSourceImp( httpHelper: sl()));
- sl.registerFactory<TodoRemoteDataSource>(() => TodoRemoteDataSourceImp( httpHelper: sl()));
+  sl.registerFactory<UserRemoteDataSource>(
+      () => UserRemoteDataSourceImp(httpHelper: sl()));
+  sl.registerFactory<TodoRemoteDataSource>(
+      () => TodoRemoteDataSourceImp(httpHelper: sl()));
 
- //respository
- sl.registerLazySingleton<UserRepository>(() => UserRepositoryImp(sl()));
- sl.registerLazySingleton<TodosRepository>(() => TodosRepositoryImp(sl()));
+  //respository
+  sl.registerLazySingleton<UserRepository>(() => UserRepositoryImp(sl()));
+  sl.registerLazySingleton<TodosRepository>(() => TodosRepositoryImp(sl()));
 
- //use case
+  //use case
   sl.registerLazySingleton<UserUseCase>(() => UserUseCaseImp(sl()));
   sl.registerLazySingleton<TodosUseCase>(() => TodosUseCaseImp(sl()));
 
- // utilities
+  // utilities
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => NavigationService());
   sl.registerLazySingleton(() => Client());
-  sl.registerLazySingleton<HttpHelper>(() => HttpHelperImp(sl()));
-  sl.registerLazySingleton<Repository>(() => RepositoryImp(sl()));
-  sl.registerLazySingleton<UseCase>(() => UseCaseImp(
-        sl(),
-      ));
+  sl.registerLazySingleton<CheckInternetConnection>(() => CheckInternetConnectionImp());
+  sl.registerLazySingleton<HttpHelper>(() => HttpHelperImp(sl(), sl()));
 }

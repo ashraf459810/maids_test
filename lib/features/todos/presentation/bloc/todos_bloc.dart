@@ -1,23 +1,19 @@
 import 'dart:convert';
 import 'dart:math';
-
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:maids_test/core/const/const.dart';
-import 'package:maids_test/features/todos/data/models/todo_model.dart';
 import 'package:maids_test/features/todos/domain/entities/todo_entity.dart';
 import 'package:maids_test/features/todos/domain/usecases/todos_usecases.dart';
-import 'package:maids_test/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 part 'todos_event.dart';
 part 'todos_state.dart';
 
 class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
   List<Todo> todos = [];
   final TodosUseCase todosUseCase;
-  TodosBloc(this.todosUseCase) : super(TodosInitial()) {
+  final SharedPreferences sharedPreferences;
+  TodosBloc(this.todosUseCase, this.sharedPreferences) : super(TodosInitial()) {
     on<TodosEvent>((event, emit) async {
       if (event is FetchUserTodosEvent) {
         emit(LoadingTodosState());
@@ -25,7 +21,7 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
         response.fold((failure) {
           // Emit cached state if available, otherwise emit error state
           final String? cachedData =
-              sl<SharedPreferences>().getString(User.todos);
+              sharedPreferences.getString(User.todos);
           if (cachedData != null && cachedData.isNotEmpty) {
             todos = todosFromJson(cachedData);
             emit(FetchedTodosState(todos: todosFromJson(cachedData)));
@@ -50,7 +46,7 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
                   id: generateRandomId(),
                   todo: event.text,
                   completed: event.completed,
-                  userId: sl<SharedPreferences>().getString(User.id),
+                  userId: sharedPreferences.getString(User.id),
                   isLocal: true));
           // this condition to check if is added to todo created by user locally because the apis dosen't support new todo crud
           emit(FetchedTodosState(todos: todos));
@@ -64,10 +60,8 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
         }
       }
       if (event is UpdateTodoEvent) {
-        print(event.todo.id);
-        print(todos[1]);
         emit(LoadingTodosState());
-        if (event.todo.isLocal) {
+        if (event.todo.isLocal??false) {
           int index =
               todos.indexWhere((element) => element.id == event.todo.id);
 
@@ -76,19 +70,19 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
           emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.updateTodo(
-              event.todo.id, event.todo.completed);
+              event.todo.id??0, event.todo.completed);
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
               (r) => emit(FetchedTodosState(todos: todos)));
         }
       }
       if (event is DeleteTodoEvent) {
         emit(LoadingTodosState());
-        if (event.todo.isLocal) {
+        if (event.todo.isLocal??false) {
           todos.removeWhere((element) => element.id == event.todo.id);
           emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.deleteTodo(
-            event.todo.id,
+            event.todo.id??0,
           );
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
               (r) => emit(FetchedTodosState(todos: todos)));
@@ -99,7 +93,7 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
 
   @override
   TodosState? fromJson(Map<String, dynamic> json) {
-    String? jsonTodos = sl<SharedPreferences>().getString(User.todos);
+    String? jsonTodos = sharedPreferences.getString(User.todos);
     if (jsonTodos != null) {
       final todos = todosFromJson(jsonTodos);
 
@@ -112,7 +106,7 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
   @override
   Map<String, dynamic>? toJson(TodosState state) {
     if (state is FetchedTodosState) {
-      sl<SharedPreferences>().setString(User.todos, jsonEncode(state.todos));
+      sharedPreferences.setString(User.todos, jsonEncode(state.todos));
     }
 
     return null;
