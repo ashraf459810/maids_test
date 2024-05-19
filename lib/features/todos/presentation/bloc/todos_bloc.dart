@@ -17,11 +17,11 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
     on<TodosEvent>((event, emit) async {
       if (event is FetchUserTodosEvent) {
         emit(LoadingTodosState());
-        var response = await todosUseCase.fetchUserTodos(event.page);
+        var response = await todosUseCase.fetchUserTodos(event.skip,event.limit);
+
         response.fold((failure) {
           // Emit cached state if available, otherwise emit error state
-          final String? cachedData =
-              sharedPreferences.getString(User.todos);
+          final String? cachedData = sharedPreferences.getString(User.todos);
           if (cachedData != null && cachedData.isNotEmpty) {
             todos = todosFromJson(cachedData);
             emit(FetchedTodosState(todos: todosFromJson(cachedData)));
@@ -34,7 +34,9 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
           } else {
             todos.addAll(r.todos);
           }
+
           emit(FetchedTodosState(todos: todos));
+      
         });
       }
       if (event is AddTodoEvent) {
@@ -61,37 +63,34 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
       }
       if (event is UpdateTodoEvent) {
         emit(LoadingTodosState());
-        if (event.todo.isLocal??false) {
-          int index =
-              todos.indexWhere((element) => element.id == event.todo.id);
-
-          final updatedTodo = event.todo;
-          todos[index] = updatedTodo;
+        if (event.todo.isLocal ?? false) {
+          addToTodos(event.todo);
           emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.updateTodo(
-              event.todo.id??0, event.todo.completed);
+              event.todo.id ?? 0, event.todo.completed);
+          addToTodos(event.todo);
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
               (r) => emit(FetchedTodosState(todos: todos)));
         }
       }
       if (event is DeleteTodoEvent) {
         emit(LoadingTodosState());
-        if (event.todo.isLocal??false) {
-          todos.removeWhere((element) => element.id == event.todo.id);
+        if (event.todo.isLocal ?? false) {
+          removeFromTodos(event.todo);
           emit(FetchedTodosState(todos: todos));
         } else {
           var response = await todosUseCase.deleteTodo(
-            event.todo.id??0,
+            event.todo.id ?? 0,
           );
+          removeFromTodos(event.todo);
           response.fold((l) => emit(ErrorFetchingTodos(error: l.error!)),
               (r) => emit(FetchedTodosState(todos: todos)));
         }
       }
     });
   }
-
-  @override
+@override
   TodosState? fromJson(Map<String, dynamic> json) {
     String? jsonTodos = sharedPreferences.getString(User.todos);
     if (jsonTodos != null) {
@@ -102,14 +101,23 @@ class TodosBloc extends HydratedBloc<TodosEvent, TodosState> {
       return null;
     }
   }
-
-  @override
+@override
   Map<String, dynamic>? toJson(TodosState state) {
     if (state is FetchedTodosState) {
       sharedPreferences.setString(User.todos, jsonEncode(state.todos));
     }
 
     return null;
+  }
+
+  void addToTodos(Todo todo) {
+    int index = todos.indexWhere((element) => element.id == todo.id);
+    final updatedTodo = todo;
+    todos[index] = updatedTodo;
+  }
+
+  void removeFromTodos(Todo todo) {
+    todos.removeWhere((element) => element.id == todo.id);
   }
 }
 

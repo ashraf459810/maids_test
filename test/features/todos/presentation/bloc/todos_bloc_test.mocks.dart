@@ -48,18 +48,26 @@ class MockTodosUseCase extends _i1.Mock implements _i3.TodosUseCase {
 
   @override
   _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>> fetchUserTodos(
-          int? page) =>
+    int? skip,
+    int? limit,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #fetchUserTodos,
-          [page],
+          [
+            skip,
+            limit,
+          ],
         ),
         returnValue: _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>>.value(
             _FakeEither_0<_i5.Failure, _i6.TodoModel>(
           this,
           Invocation.method(
             #fetchUserTodos,
-            [page],
+            [
+              skip,
+              limit,
+            ],
           ),
         )),
       ) as _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>>);

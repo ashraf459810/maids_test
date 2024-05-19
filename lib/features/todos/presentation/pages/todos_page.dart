@@ -19,12 +19,13 @@ class TodoListPage extends StatefulWidget {
 class _TodoListPageState extends State<TodoListPage> {
   final ScrollController _scrollController = ScrollController();
   List<Todo> todos = [];
-  int page = 1;
+  int limit = 10;
+  int skip = 0;
   TodosBloc todosBloc = sl<TodosBloc>();
 
   @override
   void initState() {
-    todosBloc.add(FetchUserTodosEvent(page: page));
+    todosBloc.add(FetchUserTodosEvent(skip: skip,limit: limit));
     super.initState();
 
     _scrollController.addListener(() {
@@ -36,8 +37,8 @@ class _TodoListPageState extends State<TodoListPage> {
   }
 
   Future<void> _loadMoreTodos() async {
-    page++;
-    todosBloc.add(FetchUserTodosEvent(page: page));
+    skip = limit +skip;
+    todosBloc.add(FetchUserTodosEvent(skip: skip,limit: limit));
   }
 
   void _showAddTodoDialog() {
@@ -91,7 +92,7 @@ class _TodoListPageState extends State<TodoListPage> {
                 if (state is FetchedTodosState) {
                   todos = state.todos;
                 }
-
+      
                 return ListView.builder(
                   shrinkWrap: true,
                   controller: _scrollController,

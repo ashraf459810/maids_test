@@ -52,11 +52,11 @@ Future<void> main() async {
       build: () => TodosBloc(mockTodosUseCase, mockSharedPreferences),
       act: (bloc) {
         // Mock success response
-        when(mockTodosUseCase.fetchUserTodos(
-          1,
+        when(mockTodosUseCase.fetchUserTodos(0,10
+          
         )).thenAnswer((_) async =>
-            Right(TodoModel(limit: 10, skip: 1, todos: todos, total: 10)));
-        bloc.add(const FetchUserTodosEvent(page: 1));
+            Right(TodoModel(limit: 10, skip: 0, todos: todos, total: 10)));
+        bloc.add(const FetchUserTodosEvent(limit: 10,skip: 0));
       },
       expect: () => [
         LoadingTodosState(),

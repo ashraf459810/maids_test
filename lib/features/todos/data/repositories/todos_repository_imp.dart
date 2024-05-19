@@ -14,9 +14,9 @@ class TodosRepositoryImp implements TodosRepository {
   );
 
   @override
-  Future<Either<Failure, TodoModel>> fetchTodos(int page) async {
+  Future<Either<Failure, TodoModel>> fetchTodos(int skip , int limit) async {
     try {
-      final result = await todoRemoteDataSource.fetchUserTodos(page);
+      final result = await todoRemoteDataSource.fetchUserTodos(skip,limit);
 
       return Right(result);
     } catch (e) {

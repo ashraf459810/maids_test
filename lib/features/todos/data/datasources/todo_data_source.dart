@@ -8,7 +8,7 @@ import 'package:maids_test/injection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 abstract class TodoRemoteDataSource {
-  Future<TodoModel> fetchUserTodos(int page);
+  Future<TodoModel> fetchUserTodos(int skip , int limit);
   Future<Todo> addTodo(String text , bool completed);
   Future<Todo> updateTodo(int id, bool completed);
   Future<Todo> deleteTodo(int id );
@@ -20,8 +20,8 @@ class TodoRemoteDataSourceImp extends TodoRemoteDataSource {
   TodoRemoteDataSourceImp({required this.httpHelper});
 
   @override
-  Future<TodoModel> fetchUserTodos(int page) async {
-    final response = await httpHelper.getRequest('/todos?limit=10&skip=$page');
+  Future<TodoModel> fetchUserTodos(int skip , int limit) async {
+    final response = await httpHelper.getRequest('/todos?limit=$limit&skip=$skip');
 
     final todos = todoModelFromJson(response);
 

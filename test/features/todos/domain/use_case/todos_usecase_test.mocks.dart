@@ -46,18 +46,27 @@ class MockTodosRepository extends _i1.Mock implements _i3.TodosRepository {
   }
 
   @override
-  _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>> fetchTodos(int? page) =>
+  _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>> fetchTodos(
+    int? skip,
+    int? limit,
+  ) =>
       (super.noSuchMethod(
         Invocation.method(
           #fetchTodos,
-          [page],
+          [
+            skip,
+            limit,
+          ],
         ),
         returnValue: _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>>.value(
             _FakeEither_0<_i5.Failure, _i6.TodoModel>(
           this,
           Invocation.method(
             #fetchTodos,
-            [page],
+            [
+              skip,
+              limit,
+            ],
           ),
         )),
       ) as _i4.Future<_i2.Either<_i5.Failure, _i6.TodoModel>>);

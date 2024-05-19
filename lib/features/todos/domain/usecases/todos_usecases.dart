@@ -5,7 +5,7 @@ import 'package:maids_test/features/todos/domain/repositories/todos_repository.d
 import '../../../../core/error/failures.dart';
 
 abstract class TodosUseCase {
-  Future<Either<Failure, TodoModel>> fetchUserTodos(int page);
+  Future<Either<Failure, TodoModel>> fetchUserTodos(int skip , int limit);
     Future<Either<Failure, Todo>> addTodo(String text , bool completed);
   Future<Either<Failure, Todo>> updateTodo(int id, bool completed);
   Future<Either<Failure, Todo>> deleteTodo(int id );
@@ -17,8 +17,8 @@ class TodosUseCaseImp implements TodosUseCase {
   TodosUseCaseImp(this.todosRepository);
 
   @override
-  Future<Either<Failure, TodoModel>> fetchUserTodos(int page) async {
-    return await todosRepository.fetchTodos(page);
+  Future<Either<Failure, TodoModel>> fetchUserTodos(int skip , int limit) async {
+    return await todosRepository.fetchTodos( skip ,  limit);
   }
   
   @override

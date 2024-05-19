@@ -55,16 +55,26 @@ class MockTodoRemoteDataSource extends _i1.Mock
   }
 
   @override
-  _i5.Future<_i2.TodoModel> fetchUserTodos(int? page) => (super.noSuchMethod(
+  _i5.Future<_i2.TodoModel> fetchUserTodos(
+    int? skip,
+    int? limit,
+  ) =>
+      (super.noSuchMethod(
         Invocation.method(
           #fetchUserTodos,
-          [page],
+          [
+            skip,
+            limit,
+          ],
         ),
         returnValue: _i5.Future<_i2.TodoModel>.value(_FakeTodoModel_0(
           this,
           Invocation.method(
             #fetchUserTodos,
-            [page],
+            [
+              skip,
+              limit,
+            ],
           ),
         )),
       ) as _i5.Future<_i2.TodoModel>);

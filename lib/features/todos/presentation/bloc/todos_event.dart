@@ -10,9 +10,9 @@ abstract class TodosEvent extends Equatable {
 
 
 class FetchUserTodosEvent extends TodosEvent{
-  final int page ;
-
-  const FetchUserTodosEvent({required this.page});
+  final int skip ;
+final int limit;
+  const FetchUserTodosEvent({required this.skip,required this.limit});
 }
 
 
